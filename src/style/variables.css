@@ -1,0 +1,21 @@
+:root {
+    --color-white: #fff;
+    --color-black: #000;
+
+    --color-dark-1: #1E1E1E;
+    --color-dark-2: #2C2C2C;
+
+    --color-gray-1: #F5F5F5;
+    --color-gray-2: #D9D9D9;
+    --color-gray-3: #B3B3B3;
+    --color-gray-4: #757575;
+
+    --border: 1px solid var(--color-gray-2);
+    --border-radius: 8px;
+    --box-shadow: 0px 4px 4px -4px #0C0C0D0D, 0px 16px 32px -4px #0C0C0D1A;
+
+    --input-height: 40px;
+
+    --transition-duration: 0.2s;
+
+}
