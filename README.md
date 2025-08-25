@@ -1,1 +1,1 @@
-STUDY TO DO LIST
+Study project
