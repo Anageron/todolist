@@ -276,6 +276,7 @@ class Todo{
   // Удаляем из state
   this.state.items = this.state.items.filter(item => item.id !== id);
   this.filter();
+  
   // Обновляем интерфейс
   this.render();
 
@@ -398,6 +399,7 @@ class Todo{
 
   renderPagination() {
   const items = this.state.filteredItems ?? this.state.items;
+  console.log(items);
   const totalPages = Math.ceil(items.length / this.state.itemsPerPage);
   const currentPage = this.state.currentPage;
 
@@ -422,8 +424,8 @@ class Todo{
   this.paginationElement.appendChild(firstButton);
 
   // Если много страниц — добавляем "..."
-  if (totalPages > 7) {
-    if (currentPage > 4) {
+  if (totalPages) {
+    if (currentPage > 2) {
       const ellipsisStart = document.createElement('span');
       ellipsisStart.textContent = '...';
       ellipsisStart.style.margin = '0 4px';
@@ -443,7 +445,7 @@ class Todo{
   }
 
   // Добавляем "..." перед последней, если нужно
-  if (totalPages > 7) {
+  if (totalPages) {
     if (currentPage < totalPages - 3) {
       const ellipsisEnd = document.createElement('span');
       ellipsisEnd.textContent = '...';
