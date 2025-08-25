@@ -101,6 +101,39 @@ class Todo{
     )
   }
 
+  createItemElement({ id, title, isChecked }) {
+  const li = document.createElement('li');
+  li.className = 'todo__item todo-item';
+  li.dataset.jsTodoItem = '';
+
+  li.innerHTML = `
+    <input
+      class="todo-item__checkbox"
+      id="${id}"
+      type="checkbox"
+      ${isChecked ? 'checked' : ''}
+      data-js-todo-item-checkbox
+    />
+    <label for="${id}" class="todo-item__label" data-js-todo-item-label>
+      ${title}
+    </label>
+    <button
+      class="todo-item__delete-button"
+      type="button"
+      aria-label="Delete"
+      title="Delete"
+      data-js-todo-item-delete-button
+    >
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 5L5 15M5 5L15 15" stroke="#757575" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  `;
+
+  return li;
+}
+
+
   render() {
     this.totalTasksElement.textContent = this.state.items.length
 
@@ -110,44 +143,50 @@ class Todo{
     )
 
     const items = this.state.filteredItems ?? this.state.items
+    
+    this.listElement.textContent = '';
 
-    this.listElement.innerHTML = items.map(({id, title, isChecked})=>`
-      <li class="todo__item todo-item" data-js-todo-item>
-          <input
-            class="todo-item__checkbox"
-            id="${id}"
-            type="checkbox"
-            ${isChecked ? 'checked' : ''}
-            data-js-todo-item-checkbox
-          />
-          <label for="${id}" class="todo-item__label" data-js-todo-item-label
-            >${title}</label
-          >
-          <button
-            class="todo-item__delete-button"
-            type="button"
-            aria-label="Delete"
-            title="Delete"
-            data-js-todo-item-delete-button
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M15 5L5 15M5 5L15 15"
-                stroke="#757575"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
-        </li>
-    `).join('')
+     items.forEach(item => {
+    const itemElement = this.createItemElement(item);
+    this.listElement.prepend(itemElement); // prepend — добавляет В НАЧАЛО
+  });
+    // this.listElement.innerHTML = items.map(({id, title, isChecked})=>`
+    //   <li class="todo__item todo-item" data-js-todo-item>
+    //       <input
+    //         class="todo-item__checkbox"
+    //         id="${id}"
+    //         type="checkbox"
+    //         ${isChecked ? 'checked' : ''}
+    //         data-js-todo-item-checkbox
+    //       />
+    //       <label for="${id}" class="todo-item__label" data-js-todo-item-label
+    //         >${title}</label
+    //       >
+    //       <button
+    //         class="todo-item__delete-button"
+    //         type="button"
+    //         aria-label="Delete"
+    //         title="Delete"
+    //         data-js-todo-item-delete-button
+    //       >
+    //         <svg
+    //           width="20"
+    //           height="20"
+    //           viewBox="0 0 20 20"
+    //           fill="none"
+    //           xmlns="http://www.w3.org/2000/svg"
+    //         >
+    //           <path
+    //             d="M15 5L5 15M5 5L15 15"
+    //             stroke="#757575"
+    //             stroke-width="2"
+    //             stroke-linecap="round"
+    //             stroke-linejoin="round"
+    //           />
+    //         </svg>
+    //       </button>
+    //     </li>
+    // `).join('')
 
     const isEmptyFilteredItems = this.state.filteredItems?.length === 0
     const  isEmptyItems = this.state.items.length === 0
