@@ -168,14 +168,14 @@ class Todo{
   //   this.render()
   // }
   async addItem(title) {
-  const id = crypto?.randomUUID?.() ?? Date.now().toString();
+ 
 
   const newItem = {
-    id,
+    id: crypto?.randomUUID() ?? Date.now().toString(),
     title,
     isChecked: false,
   };
-
+  console.log(newItem);
   this.state.items.push(newItem);
   this.saveItemsToLocalStorage();
   this.render();
@@ -187,7 +187,7 @@ class Todo{
       body: JSON.stringify({
         title: newItem.title,
         body: '', // требуется для этого API
-        userId: 1, // требуется
+        id: newItem.id,
       }),
       headers: {
         'Content-type': 'application/json; charset=UTF-8',
