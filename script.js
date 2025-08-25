@@ -24,6 +24,10 @@ class Todo{
 
   constructor() {
     this.rootElement = document.querySelector(this.selectors.root);
+    this.paginationElement = this.rootElement.querySelector('[data-js-todo-pagination]') 
+      || document.createElement('div');
+    this.paginationElement.setAttribute('data-js-todo-pagination', '');
+    this.rootElement.appendChild(this.paginationElement);
     this.newTaskFormElement = document.querySelector(this.selectors.newTaskForm);
     this.newTaskInputElement = document.querySelector(this.selectors.newTaskInput);
     this.searchTaskFormElement = document.querySelector(this.selectors.searchTaskForm);
@@ -41,10 +45,12 @@ class Todo{
       items: [],
       filteredItems: null,
       searchQuery: '',
+      currentPage: 1,
+      itemsPerPage: 10,
     }
-    this.init();
-    this.render()
-    this.bindEvents()
+    
+    this.init()
+  
   }
 
   async init() {
@@ -146,10 +152,10 @@ class Todo{
     
     this.listElement.textContent = '';
 
-     items.forEach(item => {
-    const itemElement = this.createItemElement(item);
-    this.listElement.prepend(itemElement); // prepend — добавляет В НАЧАЛО
-  });
+  //    items.forEach(item => {
+  //   const itemElement = this.createItemElement(item);
+  //   this.listElement.prepend(itemElement); // prepend — добавляет В НАЧАЛО
+  // });
     // this.listElement.innerHTML = items.map(({id, title, isChecked})=>`
     //   <li class="todo__item todo-item" data-js-todo-item>
     //       <input
@@ -195,6 +201,20 @@ class Todo{
       isEmptyFilteredItems ? 'Tasks not found'
       : isEmptyItems ? 'There are not tasks yet'
       :''
+    
+
+    if (!isEmptyFilteredItems && !isEmptyItems) {
+    const startIndex = (this.state.currentPage - 1) * this.state.itemsPerPage;
+    const endIndex = startIndex + this.state.itemsPerPage;
+    const paginatedItems = items.slice(startIndex, endIndex);
+
+      paginatedItems.forEach(item => {
+      const itemElement = this.createItemElement(item);
+      this.listElement.append(itemElement);
+    });
+  }
+
+  this.renderPagination();
   }
 
   // addItem(title){
@@ -214,10 +234,16 @@ class Todo{
     title,
     isChecked: false,
   };
-  console.log(newItem);
-  this.state.items.push(newItem);
+
+  this.state.items.unshift(newItem);
+  
   this.saveItemsToLocalStorage();
+
+  this.state.currentPage = 1;
+  
   this.render();
+
+   
 
   // Отправляем новую задачу на сервер (опционально)
   try {
@@ -299,6 +325,7 @@ class Todo{
   resetFilter(){
     this.state.filteredItems = null
     this.state.searchQuery = ""
+    this.state.currentPage = 1
     this.render()
   }
 
@@ -325,6 +352,7 @@ class Todo{
     if(value.length > 0) {
       this.state.searchQuery = value
       this.filter()
+      this.state.currentPage = 1
     } else {
       this.resetFilter()
     }
@@ -364,6 +392,101 @@ class Todo{
     this.listElement.addEventListener('click',this.onClick)
     this.listElement.addEventListener('change',this.onChange)
   }
+
+  renderPagination() {
+  const items = this.state.filteredItems ?? this.state.items;
+  const totalPages = Math.ceil(items.length / this.state.itemsPerPage);
+  const currentPage = this.state.currentPage;
+
+  // Очищаем
+  this.paginationElement.innerHTML = '';
+
+  if (totalPages <= 1) {
+    this.paginationElement.style.display = 'none';
+    return;
+  }
+
+  // Кнопка "Назад"
+  const prevButton = document.createElement('button');
+  prevButton.type = 'button';
+  prevButton.disabled = currentPage === 1;
+  prevButton.textContent = '←';
+  prevButton.addEventListener('click', () => this.goToPage(currentPage - 1));
+  this.paginationElement.appendChild(prevButton);
+
+  // Всегда показываем первую страницу
+  const firstButton = this.createPageButton(1, currentPage);
+  this.paginationElement.appendChild(firstButton);
+
+  // Если много страниц — добавляем "..."
+  if (totalPages > 7) {
+    if (currentPage > 4) {
+      const ellipsisStart = document.createElement('span');
+      ellipsisStart.textContent = '...';
+      ellipsisStart.style.margin = '0 4px';
+      this.paginationElement.appendChild(ellipsisStart);
+    }
+  }
+
+  // Показываем 3 страницы вокруг текущей
+  const start = Math.max(2, currentPage - 1);
+  const end = Math.min(totalPages - 1, currentPage + 1);
+
+  for (let page = start; page <= end; page++) {
+    if (page !== 1 && page !== totalPages) {
+      const button = this.createPageButton(page, currentPage);
+      this.paginationElement.appendChild(button);
+    }
+  }
+
+  // Добавляем "..." перед последней, если нужно
+  if (totalPages > 7) {
+    if (currentPage < totalPages - 3) {
+      const ellipsisEnd = document.createElement('span');
+      ellipsisEnd.textContent = '...';
+      ellipsisEnd.style.margin = '0 4px';
+      this.paginationElement.appendChild(ellipsisEnd);
+    }
+  }
+
+  // Показываем последнюю страницу, если она не отображается
+  if (totalPages > 1) {
+    if (totalPages !== 1) {
+      const lastButton = this.createPageButton(totalPages, currentPage);
+      this.paginationElement.appendChild(lastButton);
+    }
+  }
+
+  // Кнопка "Вперёд"
+  const nextButton = document.createElement('button');
+  nextButton.type = 'button';
+  nextButton.disabled = currentPage === totalPages;
+  nextButton.textContent = '→';
+  nextButton.addEventListener('click', () => this.goToPage(currentPage + 1));
+  this.paginationElement.appendChild(nextButton);
+
+}
+
+createPageButton(page, currentPage) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = page;
+  button.classList.toggle('active', page === currentPage);
+  button.addEventListener('click', () => this.goToPage(page));
+  return button;
+}
+
+goToPage(page) {
+  const items = this.state.filteredItems ?? this.state.items;
+  const totalPages = Math.ceil(items.length / this.state.itemsPerPage);
+
+  if (page < 1 || page > totalPages) return;
+
+  this.state.currentPage = page;
+  this.render(); // Перерисовываем список и пагинацию
+}
+
+
 }
 
 new Todo()

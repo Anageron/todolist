@@ -2,49 +2,50 @@
   display: flex;
   align-items: center;
   column-gap: 12px;
-  padding-left: 10px;
+  min-height: 50px;
   border: var(--border);
   border-radius: var(--border-radius);
+  padding-left: 10px;
   transition-duration: var(--transition-duration);
 
-  &:hover{
+  &:hover {
     background-color: var(--color-gray-1);
   }
 
-  &.is-disappearing{
+  &.is-disappearing {
     opacity: 0;
-    translate: 0 -75%;
     transition-duration: calc(var(--transition-duration) * 2);
     pointer-events: none;
+    translate: 0 -75%;
 
     & ~ .todo-item {
-      translate: 0 calc((100% + var(--todoListRowGap)) * -1);
       transition-delay: var(--transition-duration);
       transition-duration: var(--transition-duration);
       pointer-events: none;
+      translate: 0 calc((100% + var(--todoListRowGap)) * -1);
     }
   }
-} 
+}
 
 .todo-item__checkbox {
-  flex-shrink: 0;
-  appearance: none;
   position: relative;
+  flex-shrink: 0;
   width: 20px;
   height: 20px;
   margin: 0;
   border: 1px solid var(--color-gray-4);
   border-radius: 4px;
+  appearance: none;
 
   &:not(:checked) {
-    &::after{
+    &::after {
       opacity: 0;
     }
   }
 
-  &:checked{
-    background-color: var(--color-dark-2);
+  &:checked {
     border-color: var(--color-dark-2);
+    background-color: var(--color-dark-2);
 
     & + .todo-item__label {
       color: var(--color-gray-4);
@@ -52,51 +53,56 @@
     }
   }
 
-
-
-  &::after{
+  &::after {
     content: "";
     position: absolute;
     top: 50%;
     left: 50%;
-    translate: -50% -50%;
     width: 16px;
     height: 16px;
-    background: url('../../icons/icon-check_white.svg') center/contain no-repeat;
-
+    background: url("../../icons/icon-check_white.svg") center/contain no-repeat;
+    translate: -50% -50%;
   }
 }
 
 .todo-item__label {
-    width: 100%;
-    pointer-events: none;
+  width: 100%;
+  pointer-events: none;
+  flex-grow: 1;
+  white-space: normal; /* Разрешаем перенос */
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Ограничиваем до 2 строк */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
 }
 
 .todo-item__delete-button {
-  flex-shrink: 0;
   display: inline-flex;
+  flex-shrink: 0;
   justify-content: center;
   align-items: center;
   width: 44px;
   height: 44px;
   margin-left: auto;
+  border: none;
+  border-radius: inherit;
   padding: 0;
   color: var(--color-gray-4);
   background-color: transparent;
-  border: none;
-  border-radius: inherit;
 
-  &:hover{
+  &:hover {
     color: var(--color-white);
     background-color: var(--color-dark-1);
   }
 
-  &:active{
+  &:active {
     scale: 1.05;
   }
 
-  *{
+  * {
     pointer-events: none;
   }
-
 }
