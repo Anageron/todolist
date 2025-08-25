@@ -272,7 +272,7 @@ class Todo{
   //   this.render()
   // }
 
-  async deleteItem(id) {
+   deleteItem(id) {
   // Удаляем из state
   this.state.items = this.state.items.filter(item => item.id !== id);
   
@@ -281,10 +281,11 @@ class Todo{
 
   // Сохраняем в localStorage
   this.saveItemsToLocalStorage();
+  this.filter();
 
   // Опционально: удаляем с сервера (если это пост с API)
   // Проверим, если id — число (как в JSONPlaceholder), удаляем
-  const postId = Number(id);
+  // const postId = Number(id);
   if (!isNaN(postId)) {
     try {
       await fetch(`https://jsonplaceholder.typicode.com/posts/${postId}`, {
@@ -314,6 +315,7 @@ class Todo{
   }
 
   filter(){
+    
     const queryFormatted = this.state.searchQuery.toLowerCase()
     this.state.filteredItems = this.state.items.filter(({title}) => {
       const titleFormatted = title.toLowerCase()

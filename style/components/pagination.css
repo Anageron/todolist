@@ -1,21 +1,21 @@
 .pagination {
   display: inline-flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 16px;
-  gap: 8px;
-  margin: 20px 0;
   flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 20px 0;
+  font-size: 16px;
 }
 
 .pagination button {
  height: var(--input-height);
+  border: none;
+  border-radius: var(--border-radius);
   padding: 4px;
   color: var(--color-gray-2);
   background-color: transparent;
-  border: none;
-  border-radius: var(--border-radius);
 
     &:hover:not(:disabled){
     color: var(--color-dark-2);
@@ -31,10 +31,10 @@
 
 [data-js-todo-pagination] > div {
   display: flex;
-  align-items: center;
-  gap: 4px;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
+  gap: 4px;
   max-width: 70%;
   margin: 0 8px;
 }
