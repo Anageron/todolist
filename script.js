@@ -37,30 +37,62 @@ class Todo{
     // this.itemDeleteButtonElement = document.querySelector(this.selectors.itemDeleteButton);
     this.emptyMessageElement = document.querySelector(this.selectors.emptyMessage);
     this.state = {
-      items: this.getItemsFromLocalStorage(),
+      //items: this.getItemsFromLocalStorage(),
+      items: [],
       filteredItems: null,
       searchQuery: '',
     }
+    this.init();
     this.render()
     this.bindEvents()
   }
 
-  getItemsFromLocalStorage() {
-    const rawData = localStorage.getItem(this.localStorageKey)
+  async init() {
+  this.state.items = await this.getItemsFromLocalStorage();
+  this.render();
+  this.bindEvents();
+}
 
-    if(!rawData){
-      return []
+  async getItemsFromLocalStorage() {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    
+    if (!response.ok) {
+      throw new Error(`Ошибка загрузки: ${response.status}`);
     }
 
-    try{
-      const parsedData = JSON.parse(rawData);
+    const rawData = await response.json(); // ← Получаем данные
+    console.log('Загружено с API:', rawData);
 
-      return Array.isArray(parsedData) ? parsedData : []
-    } catch {
-      console.error('Todo items parse error')
-      return []
-    }
+    // Возвращаем только нужные поля: id, title, isChecked
+    return rawData.map(post => ({
+      id: post.id.toString(), // id должен быть строкой, если используете crypto/randomUUID
+      title: post.title,
+      isChecked: false // по умолчанию не выполнено
+    }));
+  } catch (error) {
+    console.error('Ошибка при загрузке данных:', error);
+    return []; // если ошибка — возвращаем пустой массив
   }
+}
+
+  //  getItemsFromLocalStorage() {
+  //   const rawData = localStorage.getItem(this.localStorageKey)
+
+  
+  //   if(!rawData){
+  //     return []
+  //   }
+
+  //   try{
+  //     const parsedData = JSON.parse(rawData);
+        
+  //     return Array.isArray(parsedData) ? parsedData : []
+  //   } catch {
+  //     console.error('Todo items parse error')
+  //     return []
+  //   }
+  // }
 
   saveItemsToLocalStorage() {
     localStorage.setItem(
@@ -126,21 +158,81 @@ class Todo{
       :''
   }
 
-  addItem(title){
-    this.state.items.push({
-      id: crypto?.randomUUID() ?? Date.now().toString(),
-      title,
-      isChecked: false,
-    })
-    this.saveItemsToLocalStorage()
-    this.render()
-  }
+  // addItem(title){
+  //   this.state.items.push({
+  //     id: crypto?.randomUUID() ?? Date.now().toString(),
+  //     title,
+  //     isChecked: false,
+  //   })
+  //   this.saveItemsToLocalStorage()
+  //   this.render()
+  // }
+  async addItem(title) {
+  const id = crypto?.randomUUID?.() ?? Date.now().toString();
 
-  deleteItem(id){
-    this.state.items = this.state.items.filter((item) => item.id !==id )
-    this.saveItemsToLocalStorage()
-    this.render()
+  const newItem = {
+    id,
+    title,
+    isChecked: false,
+  };
+
+  this.state.items.push(newItem);
+  this.saveItemsToLocalStorage();
+  this.render();
+
+  // Отправляем новую задачу на сервер (опционально)
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+      method: 'POST',
+      body: JSON.stringify({
+        title: newItem.title,
+        body: '', // требуется для этого API
+        userId: 1, // требуется
+      }),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+    });
+    const json = await response.json();
+    console.log('Задача отправлена:', json);
+  } catch (error) {
+    console.error('Ошибка отправки:', error);
   }
+}
+
+
+  // deleteItem(id){
+  //   this.state.items = this.state.items.filter((item) => item.id !==id )
+  //   this.saveItemsToLocalStorage()
+  //   this.render()
+  // }
+
+  async deleteItem(id) {
+  // Удаляем из state
+  this.state.items = this.state.items.filter(item => item.id !== id);
+  
+  // Обновляем интерфейс
+  this.render();
+
+  // Сохраняем в localStorage
+  this.saveItemsToLocalStorage();
+
+  // Опционально: удаляем с сервера (если это пост с API)
+  // Проверим, если id — число (как в JSONPlaceholder), удаляем
+  const postId = Number(id);
+  if (!isNaN(postId)) {
+    try {
+      await fetch(`https://jsonplaceholder.typicode.com/posts/${postId}`, {
+        method: 'DELETE',
+      });
+      console.log(`Пост с id=${postId} удалён с сервера`);
+    } catch (error) {
+      console.error(`Ошибка при удалении поста ${postId}:`, error);
+      // Не критично — данные уже удалены локально
+    }
+  }
+}
+  
 
   toggleCheckedState(id) {
     this.state.items = this.state.items.map((item) => {
@@ -236,3 +328,6 @@ class Todo{
 }
 
 new Todo()
+
+
+
